@@ -7,11 +7,11 @@
 		<artifactId>perfulandia</artifactId>
 		<version>1.0-SNAPSHOT</version>
 	</parent>
-	<groupId>com.example.msvc.inventario</groupId>
-	<artifactId>msvc-inventario</artifactId>
+	<groupId>benja.msvc-ventas</groupId>
+	<artifactId>msvc-ventas</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>msvc-inventario</name>
-	<description>Demo project for Spring Boot</description>
+	<name>msvc-ventas</name>
+	<description>microservicio de ventas</description>
 	<url/>
 	<licenses>
 		<license/>
