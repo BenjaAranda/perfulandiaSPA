@@ -1,11 +1,12 @@
-package com.facturacion.servicio;
+package com.example.msvc.facturacion.servicio;
 
-import com.facturacion.DTO.FacturaDTO;
-import com.facturacion.DTO.ItemFacturaDTO;
-import com.facturacion.clients.VentaFeignClient;
-import com.facturacion.modelo.Factura;
-import com.facturacion.modelo.ItemFactura;
-import com.facturacion.repository.FacturaRepository;
+
+import com.example.msvc.facturacion.DTO.ItemFacturaDTO;
+import com.example.msvc.facturacion.DTO.FacturaDTO;
+import com.example.msvc.facturacion.modelo.Factura;
+import com.example.msvc.facturacion.modelo.ItemFactura;
+import com.example.msvc.facturacion.repository.FacturaRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,7 @@ import java.util.UUID;
 public class FacturaService {
 
     private final FacturaRepository facturaRepository;
-    private final VentaFeignClient ventaFeignClient;
+    private final com.example.msvc.facturacion.clients.VentaFeignClient ventaFeignClient;
 
     public FacturaDTO generarFactura(FacturaDTO facturaDTO) {
         // Obtener datos de la venta asociada (vía Feign)

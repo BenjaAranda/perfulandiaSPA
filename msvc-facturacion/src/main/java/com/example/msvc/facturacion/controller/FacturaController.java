@@ -1,7 +1,7 @@
-package com.facturacion.controller;
+package com.example.msvc.facturacion.controller;
 
-import com.facturacion.DTO.FacturaDTO;
-import com.facturacion.servicio.FacturaService;
+import com.example.msvc.facturacion.DTO.FacturaDTO;
+import com.example.msvc.facturacion.servicio.FacturaService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

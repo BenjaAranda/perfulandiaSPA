@@ -1,5 +1,5 @@
 // VentaFeignClient.java
-package com.facturacion.clients;
+package com.example.msvc.facturacion.clients;
 
 import com.facturacion.DTO.VentaDTO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -10,3 +10,5 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface VentaFeignClient {
     @GetMapping("/api/ventas/{id}")
     VentaDTO obtenerVenta(@PathVariable Long id);
+
+}

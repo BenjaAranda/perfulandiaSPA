@@ -1,3 +1,11 @@
+package com.example.msvc.facturacion.modelo;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 // ItemFactura.java
 @Entity
 @Table(name = "items_factura")

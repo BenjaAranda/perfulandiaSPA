@@ -1,3 +1,10 @@
+package com.example.msvc.facturacion.DTO;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 // ItemFacturaDTO.java
 @Data
 @Builder
