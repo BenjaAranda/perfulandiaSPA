@@ -1,44 +1,35 @@
 package com.example.msvc.facturacion.controller;
 
-import com.example.msvc.facturacion.DTO.FacturaDTO;
-import com.example.msvc.facturacion.servicio.FacturaService;
-import jakarta.validation.Valid;
+import com.example.msvc.facturacion.model.Factura;
+import com.example.msvc.facturacion.service.FacturaService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/facturas")
+@RequestMapping("/facturas")
 public class FacturaController {
 
-    private final FacturaService facturaService;
+    @Autowired
+    private FacturaService facturaService;
 
-    public FacturaController(FacturaService facturaService) {
-        this.facturaService = facturaService;
-    }
-
-    // Generar factura a partir de una venta
     @PostMapping
-    public ResponseEntity<FacturaDTO> generarFactura(@Valid @RequestBody FacturaDTO facturaDTO) {
-        return ResponseEntity.ok(facturaService.generarFactura(facturaDTO));
+    public ResponseEntity<Factura> crearFactura(@RequestBody Factura factura) {
+        return new ResponseEntity<>(facturaService.crearFactura(factura), HttpStatus.CREATED);
     }
 
-    // Obtener todas las facturas
-    @GetMapping
-    public ResponseEntity<List<FacturaDTO>> listarFacturas() {
-        return ResponseEntity.ok(facturaService.listarFacturas());
-    }
-
-    // Obtener factura por ID
     @GetMapping("/{id}")
-    public ResponseEntity<FacturaDTO> obtenerFacturaPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(facturaService.obtenerFacturaPorId(id));
+    public ResponseEntity<Factura> obtenerFactura(@PathVariable Long id) {
+        return facturaService.obtenerFactura(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    // Procesar pago (integración con Transbank)
-    @PostMapping("/{id}/pagar")
-    public ResponseEntity<FacturaDTO> procesarPago(@PathVariable Long id) {
-        return ResponseEntity.ok(facturaService.procesarPago(id));
+    @GetMapping
+    public List<Factura> listarFacturas() {
+        return facturaService.listarFacturas();
     }
 }
