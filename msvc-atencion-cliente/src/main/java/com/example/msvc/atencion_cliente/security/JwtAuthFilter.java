@@ -1,3 +1,6 @@
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Configuration;
+
 // SecurityConfig.java
 @Configuration
 @EnableWebSecurity
