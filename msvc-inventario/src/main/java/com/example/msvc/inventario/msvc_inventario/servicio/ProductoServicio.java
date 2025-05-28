@@ -24,6 +24,7 @@ public class ProductoServicio {
                 .collect(Collectors.toList());
     }
 
+
     public ProductoDTO obtenerPorId(Long id) {
         Producto producto = repositorio.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado con ID: " + id));
