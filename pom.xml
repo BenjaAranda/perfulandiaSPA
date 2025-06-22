@@ -18,8 +18,7 @@
     <modules>
         <module>msvc-inventario</module>
         <module>msvc-ventas</module>
-        <module>msvc-facturacion</module>
-        <module>msvc-atencion-cliente</module>
+        <module>msvc-clientes</module>
 
     </modules>
 
