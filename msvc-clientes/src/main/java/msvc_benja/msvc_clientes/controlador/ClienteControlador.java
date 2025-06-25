@@ -1,5 +1,7 @@
 package msvc_benja.msvc_clientes.controlador;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import msvc_benja.msvc_clientes.dto.ClienteDTO;
 import msvc_benja.msvc_clientes.servicio.ClienteServicio;
@@ -10,37 +12,44 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/clientes")
+@Tag(name = "Clientes", description = "CRUD para gestión de clientes")
 public class ClienteControlador {
 
-    private final ClienteServicio servicio;
+    private final ClienteServicio clienteServicio;
 
-    public ClienteControlador(ClienteServicio servicio) {
-        this.servicio = servicio;
+    public ClienteControlador(ClienteServicio clienteServicio) {
+        this.clienteServicio = clienteServicio;
     }
 
     @GetMapping
+    @Operation(summary = "Listar todos los clientes")
     public ResponseEntity<List<ClienteDTO>> listar() {
-        return ResponseEntity.ok(servicio.listar());
+        return ResponseEntity.ok(clienteServicio.listar());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ClienteDTO> obtener(@PathVariable Long id) {
-        return ResponseEntity.ok(servicio.obtenerPorId(id));
+    @Operation(summary = "Obtener cliente por ID")
+    public ResponseEntity<ClienteDTO> obtenerPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(clienteServicio.obtenerPorId(id));
     }
 
     @PostMapping
-    public ResponseEntity<ClienteDTO> crear(@Valid @RequestBody ClienteDTO dto) {
-        return ResponseEntity.ok(servicio.guardar(dto));
+    @Operation(summary = "Crear nuevo cliente")
+    public ResponseEntity<ClienteDTO> guardar(@Valid @RequestBody ClienteDTO dto) {
+        return ResponseEntity.status(201).body(clienteServicio.guardar(dto));
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Actualizar cliente existente")
     public ResponseEntity<ClienteDTO> actualizar(@PathVariable Long id, @Valid @RequestBody ClienteDTO dto) {
-        return ResponseEntity.ok(servicio.actualizar(id, dto));
+        return ResponseEntity.ok(clienteServicio.actualizar(id, dto));
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Eliminar cliente por ID")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        servicio.eliminar(id);
+        clienteServicio.eliminar(id);
         return ResponseEntity.noContent().build();
     }
 }
+

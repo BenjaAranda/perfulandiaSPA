@@ -40,5 +40,34 @@
         </introspection-scope>
       </schema-mapping>
     </data-source>
+    <data-source name="msvc_inventario_test" uuid="0743e31f-5726-4a62-84c7-00dae16c62c7">
+      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="H2" />
+      <user-name>sa</user-name>
+      <schema-mapping />
+    </data-source>
+    <data-source name="msvc_inventario_dev" uuid="15797eee-63b9-451f-932c-203999660db0">
+      <database-info product="H2" version="2.3.232 (2024-08-11)" jdbc-version="4.3" driver-name="H2 JDBC Driver" driver-version="2.3.232 (2024-08-11)" dbms="H2" exact-version="2.3.232" exact-driver-version="2.3">
+        <identifier-quote-string>&quot;</identifier-quote-string>
+      </database-info>
+      <case-sensitivity plain-identifiers="upper" quoted-identifiers="exact" />
+      <user-name>sa</user-name>
+      <schema-mapping>
+        <introspection-scope>
+          <node kind="database" qname="@">
+            <node kind="schema" qname="@" />
+          </node>
+        </introspection-scope>
+      </schema-mapping>
+    </data-source>
+    <data-source name="msvc_clientes_test" uuid="275620c7-01c9-4968-abc4-c7de05a64009">
+      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="H2" />
+      <user-name>sa</user-name>
+      <schema-mapping />
+    </data-source>
+    <data-source name="msvc_clientes_dev" uuid="88a9a510-27ec-4af4-9fb3-35f34d948260">
+      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="H2" />
+      <user-name>sa</user-name>
+      <schema-mapping />
+    </data-source>
   </component>
 </project>

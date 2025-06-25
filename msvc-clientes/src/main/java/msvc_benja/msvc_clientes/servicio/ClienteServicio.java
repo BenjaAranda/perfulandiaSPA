@@ -5,9 +5,14 @@ import msvc_benja.msvc_clientes.dto.ClienteDTO;
 import java.util.List;
 
 public interface ClienteServicio {
+
     List<ClienteDTO> listar();
+
     ClienteDTO obtenerPorId(Long id);
-    ClienteDTO guardar(ClienteDTO dto);
-    ClienteDTO actualizar(Long id, ClienteDTO dto);
+
+    ClienteDTO guardar(ClienteDTO clienteDTO);
+
+    ClienteDTO actualizar(Long id, ClienteDTO clienteDTO);
+
     void eliminar(Long id);
 }

@@ -16,6 +16,7 @@ import java.util.Locale;
 public class DataFakerConfig implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DataFakerConfig.class);
+
     private final ClienteRepositorio clienteRepositorio;
 
     public DataFakerConfig(ClienteRepositorio clienteRepositorio) {
@@ -24,17 +25,20 @@ public class DataFakerConfig implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        Faker faker = new Faker(new Locale("es", "CL"));
-
         if (clienteRepositorio.count() == 0) {
-            for (int i = 0; i < 50; i++) {
+            Faker faker = new Faker(new Locale("es", "CL"));
+
+            for (int i = 0; i < 30; i++) {
                 Cliente cliente = Cliente.builder()
+                        .rut(faker.idNumber().valid())
                         .nombre(faker.name().fullName())
                         .correo(faker.internet().emailAddress())
-                        .telefono("+56 9 " + faker.number().digits(8))
+                        .telefono(faker.phoneNumber().cellPhone())
+                        .direccion(faker.address().fullAddress())
                         .build();
+
                 clienteRepositorio.save(cliente);
-                log.info("Cliente creado: {}", cliente);
+                log.info("Cliente creado: {}", cliente.getNombre());
             }
         }
     }

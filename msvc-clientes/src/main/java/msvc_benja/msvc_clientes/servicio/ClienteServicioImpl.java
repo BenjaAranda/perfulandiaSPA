@@ -43,9 +43,13 @@ public class ClienteServicioImpl implements ClienteServicio {
         Cliente existente = clienteRepositorio.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Cliente no encontrado con ID: " + id));
 
+        existente.setRut(dto.getRut());
         existente.setNombre(dto.getNombre());
+        existente.setApellido(dto.getApellido());
         existente.setCorreo(dto.getCorreo());
         existente.setTelefono(dto.getTelefono());
+        existente.setDireccion(dto.getDireccion());
+
         return toDTO(clienteRepositorio.save(existente));
     }
 
@@ -60,18 +64,24 @@ public class ClienteServicioImpl implements ClienteServicio {
     private ClienteDTO toDTO(Cliente c) {
         return ClienteDTO.builder()
                 .id(c.getId())
+                .rut(c.getRut())
                 .nombre(c.getNombre())
+                .apellido(c.getApellido())
                 .correo(c.getCorreo())
                 .telefono(c.getTelefono())
+                .direccion(c.getDireccion())
                 .build();
     }
 
     private Cliente toEntity(ClienteDTO dto) {
         return Cliente.builder()
                 .id(dto.getId())
+                .rut(dto.getRut())
                 .nombre(dto.getNombre())
+                .apellido(dto.getApellido())
                 .correo(dto.getCorreo())
                 .telefono(dto.getTelefono())
+                .direccion(dto.getDireccion())
                 .build();
     }
 }
