@@ -1,6 +1,6 @@
 package com.example.msvc.inventario.msvc_inventario.controlador;
 
-import com.example.msvc.inventario.msvc_inventario.DTO.ProductoDTO;
+import com.example.msvc.inventario.msvc_inventario.dto.ProductoDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;

@@ -1,6 +1,6 @@
 package com.example.msvc.inventario.msvc_inventario.controlador;
 
-import com.example.msvc.inventario.msvc_inventario.DTO.ProductoDTO;
+import com.example.msvc.inventario.msvc_inventario.dto.ProductoDTO;
 import com.example.msvc.inventario.msvc_inventario.servicio.ProductoServicio;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;

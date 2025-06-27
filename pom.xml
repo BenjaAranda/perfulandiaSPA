@@ -19,7 +19,7 @@
         <module>msvc-inventario</module>
         <module>msvc-ventas</module>
         <module>msvc-clientes</module>
-
+        <module>msvc-boleta</module>
     </modules>
 
 

@@ -1,4 +1,4 @@
-package com.example.msvc.inventario.msvc_inventario.DTO;
+package msvc_perfulandia_benja.msvc_boleta.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;

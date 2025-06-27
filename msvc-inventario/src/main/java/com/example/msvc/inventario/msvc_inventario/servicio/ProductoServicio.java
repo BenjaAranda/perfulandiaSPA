@@ -1,6 +1,6 @@
 package com.example.msvc.inventario.msvc_inventario.servicio;
 
-import com.example.msvc.inventario.msvc_inventario.DTO.ProductoDTO;
+import com.example.msvc.inventario.msvc_inventario.dto.ProductoDTO;
 import com.example.msvc.inventario.msvc_inventario.excepcion.RecursoNoEncontradoException;
 import com.example.msvc.inventario.msvc_inventario.modelo.Producto;
 import com.example.msvc.inventario.msvc_inventario.repositorio.ProductoRepositorio;
