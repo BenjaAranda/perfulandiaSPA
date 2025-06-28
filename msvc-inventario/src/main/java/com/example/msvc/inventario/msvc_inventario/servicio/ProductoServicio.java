@@ -74,4 +74,9 @@ public class ProductoServicio {
                 .precio(dto.getPrecio())
                 .build();
     }
+
+    public void eliminarTodos() {
+        repositorio.deleteAll();
+    }
+
 }
