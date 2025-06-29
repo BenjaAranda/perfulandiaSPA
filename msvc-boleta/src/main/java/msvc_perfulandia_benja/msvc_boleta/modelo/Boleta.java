@@ -26,8 +26,8 @@ public class Boleta {
     private Double total;
 
     @OneToMany(mappedBy = "boleta", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-
     private List<BoletaDetalle> items;
+
     public void calcularTotal() {
         if (items != null && !items.isEmpty()) {
             this.total = items.stream()
@@ -37,5 +37,4 @@ public class Boleta {
             this.total = 0.0;
         }
     }
-
 }

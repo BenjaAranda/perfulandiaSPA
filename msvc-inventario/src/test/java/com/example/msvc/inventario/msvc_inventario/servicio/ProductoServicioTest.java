@@ -10,6 +10,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -62,6 +65,19 @@ public class ProductoServicioTest {
         ProductoDTO saved = servicio.guardar(dto);
         assertThat(saved).isNotNull();
         assertThat(saved.getNombre()).isEqualTo("Perfume");
+        verify(repositorio).save(any(Producto.class));
+    }
+
+    @Test
+    void actualizarProducto_OK() {
+        when(repositorio.findById(1L)).thenReturn(Optional.of(producto));
+        when(repositorio.save(any())).thenReturn(producto);
+
+        ProductoDTO actualizado = servicio.actualizar(1L, dto);
+        assertThat(actualizado).isNotNull();
+        assertThat(actualizado.getNombre()).isEqualTo("Perfume");
+        verify(repositorio).findById(1L);
+        verify(repositorio).save(any(Producto.class));
     }
 
     @Test
@@ -69,5 +85,40 @@ public class ProductoServicioTest {
         when(repositorio.findById(999L)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> servicio.actualizar(999L, dto))
                 .isInstanceOf(RecursoNoEncontradoException.class);
+    }
+
+    @Test
+    void eliminarProducto_OK() {
+        when(repositorio.findById(1L)).thenReturn(Optional.of(producto));
+        servicio.eliminar(1L);
+        verify(repositorio).delete(producto);
+    }
+
+    @Test
+    void eliminarProducto_NotFound() {
+        when(repositorio.findById(999L)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> servicio.eliminar(999L))
+                .isInstanceOf(RecursoNoEncontradoException.class);
+    }
+
+    @Test
+    void eliminarTodos_OK() {
+        servicio.eliminarTodos();
+        verify(repositorio, times(1)).deleteAll();
+    }
+
+    @Test
+    void listar_OK_conDatos() {
+        when(repositorio.findAll()).thenReturn(Arrays.asList(producto));
+        List<ProductoDTO> lista = servicio.listar();
+        assertThat(lista).isNotEmpty();
+        assertThat(lista.get(0).getNombre()).isEqualTo("Perfume");
+    }
+
+    @Test
+    void listar_OK_sinDatos() {
+        when(repositorio.findAll()).thenReturn(Collections.emptyList());
+        List<ProductoDTO> lista = servicio.listar();
+        assertThat(lista).isEmpty();
     }
 }

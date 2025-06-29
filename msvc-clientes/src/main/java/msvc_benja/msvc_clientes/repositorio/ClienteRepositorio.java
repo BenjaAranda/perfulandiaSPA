@@ -9,4 +9,7 @@ import java.util.Optional;
 @Repository
 public interface ClienteRepositorio extends JpaRepository<Cliente, Long> {
     Optional<Cliente> findByRut(String rut);
+    boolean existsByRut(String rut);
+
 }
+

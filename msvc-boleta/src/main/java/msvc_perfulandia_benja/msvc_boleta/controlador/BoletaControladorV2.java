@@ -12,6 +12,10 @@ import jakarta.validation.Valid;
 import msvc_perfulandia_benja.msvc_boleta.dto.BoletaDTO;
 import msvc_perfulandia_benja.msvc_boleta.dto.ErrorDTO;
 import msvc_perfulandia_benja.msvc_boleta.servicio.BoletaServicio;
+import msvc_perfulandia_benja.msvc_boleta.assembler.BoletaModelAssembler;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -19,33 +23,46 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
 @RestController
-@RequestMapping("/api/boletas")
-@Tag(name = "Boletas", description = "Operaciones para generar y consultar boletas")
+@RequestMapping("/api/v2/boletas")
+@Tag(name = "Boletas V2", description = "Operaciones para gestionar boletas con HATEOAS")
 @Validated
-public class BoletaControlador {
+public class BoletaControladorV2 {
 
     private final BoletaServicio boletaServicio;
+    private final BoletaModelAssembler boletaModelAssembler;
 
-    public BoletaControlador(BoletaServicio boletaServicio) {
+    public BoletaControladorV2(BoletaServicio boletaServicio, BoletaModelAssembler boletaModelAssembler) {
         this.boletaServicio = boletaServicio;
+        this.boletaModelAssembler = boletaModelAssembler;
     }
 
-    @Operation(summary = "Listar todas las boletas", description = "Devuelve una lista con todas las boletas registradas")
+    @Operation(summary = "Listar todas las boletas", description = "Devuelve una lista de boletas con enlaces HATEOAS")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Boletas listadas exitosamente",
-                    content = @Content(mediaType = "application/json",
+                    content = @Content(mediaType = MediaTypes.HAL_JSON_VALUE,
                             schema = @Schema(implementation = BoletaDTO.class)))
     })
-    @GetMapping
-    public ResponseEntity<List<BoletaDTO>> listar() {
-        return ResponseEntity.ok(boletaServicio.listar());
+    @GetMapping(produces = MediaTypes.HAL_JSON_VALUE)
+    public ResponseEntity<CollectionModel<EntityModel<BoletaDTO>>> listar() {
+        List<EntityModel<BoletaDTO>> boletas = boletaServicio.listar().stream()
+                .map(boletaModelAssembler::toModel)
+                .toList();
+
+        CollectionModel<EntityModel<BoletaDTO>> collectionModel = CollectionModel.of(
+                boletas,
+                linkTo(methodOn(BoletaControladorV2.class).listar()).withSelfRel()
+        );
+
+        return ResponseEntity.ok(collectionModel);
     }
 
-    @Operation(summary = "Obtener boleta por ID", description = "Devuelve una boleta específica según el ID")
+    @Operation(summary = "Obtener boleta por ID", description = "Devuelve la boleta con enlaces HATEOAS")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Boleta encontrada",
-                    content = @Content(mediaType = "application/json",
+                    content = @Content(mediaType = MediaTypes.HAL_JSON_VALUE,
                             schema = @Schema(implementation = BoletaDTO.class))),
             @ApiResponse(responseCode = "404", description = "Boleta no encontrada",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
@@ -53,15 +70,17 @@ public class BoletaControlador {
     @Parameters(value = {
             @Parameter(name = "id", description = "ID único de la boleta", required = true)
     })
-    @GetMapping("/{id}")
-    public ResponseEntity<BoletaDTO> obtenerPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(boletaServicio.obtenerPorId(id));
+    @GetMapping(value = "/{id}", produces = MediaTypes.HAL_JSON_VALUE)
+    public ResponseEntity<EntityModel<BoletaDTO>> obtenerPorId(@PathVariable Long id) {
+        BoletaDTO boleta = boletaServicio.obtenerPorId(id);
+        EntityModel<BoletaDTO> entityModel = boletaModelAssembler.toModel(boleta);
+        return ResponseEntity.ok(entityModel);
     }
 
-    @Operation(summary = "Guardar nueva boleta", description = "Crea una nueva boleta con los datos enviados")
+    @Operation(summary = "Guardar nueva boleta", description = "Crea una nueva boleta y devuelve la representación HATEOAS")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Boleta creada exitosamente",
-                    content = @Content(mediaType = "application/json",
+                    content = @Content(mediaType = MediaTypes.HAL_JSON_VALUE,
                             schema = @Schema(implementation = BoletaDTO.class))),
             @ApiResponse(responseCode = "400", description = "Datos inválidos",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorDTO.class)))
@@ -71,13 +90,16 @@ public class BoletaControlador {
             required = true,
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = BoletaDTO.class))
     )
-    @PostMapping
-    public ResponseEntity<BoletaDTO> crear(@Valid @RequestBody BoletaDTO dto) {
+    @PostMapping(produces = MediaTypes.HAL_JSON_VALUE)
+    public ResponseEntity<EntityModel<BoletaDTO>> crear(@Valid @RequestBody BoletaDTO dto) {
         BoletaDTO boletaCreada = boletaServicio.guardar(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(boletaCreada);
+        EntityModel<BoletaDTO> entityModel = boletaModelAssembler.toModel(boletaCreada);
+        return ResponseEntity.created(
+                        linkTo(methodOn(BoletaControladorV2.class).obtenerPorId(boletaCreada.getId())).toUri())
+                .body(entityModel);
     }
 
-    @Operation(summary = "Eliminar boleta por ID", description = "Elimina una boleta según su ID")
+    @Operation(summary = "Eliminar boleta por ID", description = "Elimina una boleta específica")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Boleta eliminada exitosamente"),
             @ApiResponse(responseCode = "404", description = "Boleta no encontrada",

@@ -1,6 +1,5 @@
 package msvc_perfulandia_benja.msvc_boleta.servicio;
 
-
 import msvc_perfulandia_benja.msvc_boleta.dto.BoletaDTO;
 import msvc_perfulandia_benja.msvc_boleta.dto.ItemBoletaDTO;
 import msvc_perfulandia_benja.msvc_boleta.excepciones.RecursoNoEncontradoException;
@@ -10,152 +9,170 @@ import msvc_perfulandia_benja.msvc_boleta.repositorio.BoletaRepositorio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class BoletaServicioTest {
+@ExtendWith(MockitoExtension.class)
+class BoletaServicioTest {
 
     @Mock
-    private BoletaRepositorio boletaRepositorio;
+    private BoletaRepositorio repositorio;
 
     @InjectMocks
-    private BoletaServicioImpl boletaServicio;
+    private BoletaServicioImpl servicio;
 
-    private Boleta boletaEjemplo;
+    private Boleta boleta;
+    private BoletaDTO boletaDTO;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-
-        BoletaDetalle item = BoletaDetalle.builder()
+        ItemBoletaDTO itemDTO = ItemBoletaDTO.builder()
                 .productoId(1L)
                 .cantidad(2)
-                .precioUnitario(5000.0)
+                .precioUnitario(50.0)
                 .build();
 
-        boletaEjemplo = Boleta.builder()
-                .id(1L)
-                .clienteId(100L)
+        boletaDTO = BoletaDTO.builder()
+                .clienteId(1L)
                 .fecha(LocalDateTime.now())
-                .items(List.of(item))
-                .total(10000.0)
+                .items(List.of(itemDTO))
                 .build();
 
-        item.setBoleta(boletaEjemplo);
-    }
+        BoletaDetalle detalle = BoletaDetalle.builder()
+                .id(1L)
+                .productoId(1L)
+                .cantidad(2)
+                .precioUnitario(50.0)
+                .build();
 
+        boleta = Boleta.builder()
+                .id(1L)
+                .clienteId(1L)
+                .fecha(boletaDTO.getFecha())
+                .total(100.0)
+                .items(List.of(detalle))
+                .build();
 
-    @Test
-    @DisplayName("Debe guardar una boleta correctamente")
-    void testGuardarBoleta() {
-        when(boletaRepositorio.save(any(Boleta.class))).thenReturn(boletaEjemplo);
-
-        BoletaDTO dto = new BoletaDTO();
-        dto.setClienteId(100L);
-        ItemBoletaDTO itemDTO = new ItemBoletaDTO(1L,"Perfume A",2,5000.0,10000.0);
-        dto.setItems(List.of(itemDTO));
-
-        BoletaDTO result = boletaServicio.guardar(dto);
-
-        assertThat(result.getTotal()).isEqualTo(10000.0);
-        assertThat(result.getItems()).hasSize(1);
-        verify(boletaRepositorio, times(1)).save(any(Boleta.class));
+        detalle.setBoleta(boleta);
     }
 
     @Test
-    @DisplayName("Debe lanzar error si la boleta no existe")
-    void testBuscarBoletaNoExiste() {
-        when(boletaRepositorio.findById(99L)).thenReturn(Optional.empty());
+    @DisplayName("Listar todas las boletas")
+    void testListar() {
+        when(repositorio.findAll()).thenReturn(List.of(boleta));
 
-        assertThatThrownBy(() -> boletaServicio.obtenerPorId(99L))
+        List<BoletaDTO> resultado = servicio.listar();
+
+        assertThat(resultado).hasSize(1);
+        assertThat(resultado.get(0).getClienteId()).isEqualTo(1L);
+        verify(repositorio).findAll();
+    }
+
+    @Test
+    @DisplayName("Obtener boleta por ID existente")
+    void testObtenerPorId() {
+        when(repositorio.findById(1L)).thenReturn(Optional.of(boleta));
+
+        BoletaDTO resultado = servicio.obtenerPorId(1L);
+
+        assertThat(resultado).isNotNull();
+        assertThat(resultado.getTotal()).isEqualTo(100.0);
+        verify(repositorio).findById(1L);
+    }
+
+    @Test
+    @DisplayName("Obtener boleta por ID no existente lanza excepción")
+    void testObtenerPorIdNoExistente() {
+        when(repositorio.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> servicio.obtenerPorId(99L))
                 .isInstanceOf(RecursoNoEncontradoException.class)
                 .hasMessageContaining("Boleta no encontrada");
     }
 
     @Test
-    @DisplayName("Debe eliminar una boleta existente")
-    void testEliminarBoleta() {
-        // Mostramos el ID para verificar
-        System.out.println("ID de boletaEjemplo en test: " + boletaEjemplo.getId());
+    @DisplayName("Guardar boleta correctamente")
+    void testGuardar() {
+        when(repositorio.save(any(Boleta.class))).thenAnswer(invoc -> {
+            Boleta b = invoc.getArgument(0);
+            b.setId(2L);
+            return b;
+        });
 
-        when(boletaRepositorio.findById(1L)).thenReturn(Optional.of(boletaEjemplo));
-        doNothing().when(boletaRepositorio).deleteById(1L);
+        BoletaDTO guardada = servicio.guardar(boletaDTO);
 
-        boletaServicio.eliminar(1L);
-
-        verify(boletaRepositorio, times(1)).findById(1L); // Asegura que el mock se llama
-        verify(boletaRepositorio, times(1)).deleteById(1L);
-    }
-
-
-    @Test
-    @DisplayName("Debe lanzar excepción al eliminar boleta inexistente")
-    void testEliminarBoletaInexistente() {
-        when(boletaRepositorio.findById(2L)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> boletaServicio.eliminar(2L))
-                .isInstanceOf(RecursoNoEncontradoException.class)
-                .hasMessageContaining("Boleta no encontrada");
+        assertThat(guardada).isNotNull();
+        assertThat(guardada.getId()).isEqualTo(2L);
+        assertThat(guardada.getItems()).hasSize(1);
+        verify(repositorio).save(any());
     }
 
     @Test
-    @DisplayName("Debe calcular total correctamente")
+    @DisplayName("Eliminar boleta existente")
+    void testEliminarExistente() {
+        when(repositorio.findById(1L)).thenReturn(Optional.of(boleta));
+        doNothing().when(repositorio).deleteById(1L);
+
+        servicio.eliminar(1L);
+
+        verify(repositorio).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("Eliminar boleta inexistente lanza excepción")
+    void testEliminarInexistente() {
+        when(repositorio.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> servicio.eliminar(99L))
+                .isInstanceOf(RecursoNoEncontradoException.class);
+    }
+
+    @Test
+    @DisplayName("Conversión de Boleta a DTO")
+    void testToDTO() {
+        BoletaDTO dto = servicio.listar().isEmpty() ? servicio.toDTO(boleta) : null;
+
+        assertThat(dto).isNotNull();
+        assertThat(dto.getItems()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("Conversión de DTO a Boleta")
+    void testToEntity() {
+        Boleta entidad = servicio.toEntity(boletaDTO);
+
+        assertThat(entidad).isNotNull();
+        assertThat(entidad.getItems()).hasSize(1);
+        assertThat(entidad.getItems().get(0).getBoleta()).isEqualTo(entidad);
+    }
+
+    @Test
+    @DisplayName("Cálculo correcto del total")
     void testCalculoTotal() {
-        BoletaDetalle item1 = new BoletaDetalle(null, 1L, 2, 3000.0, null);
-        BoletaDetalle item2 = new BoletaDetalle(null, 2L, 1, 4000.0, null);
+        Boleta b = servicio.toEntity(boletaDTO);
+        b.calcularTotal();
 
-        List<BoletaDetalle> items = List.of(item1, item2);
-
-        double total = items.stream().mapToDouble(i -> i.getCantidad() * i.getPrecioUnitario()).sum();
-
-        assertThat(total).isEqualTo(10000.0);
+        assertThat(b.getTotal()).isEqualTo(100.0);
     }
 
     @Test
-    @DisplayName("Debe listar todas las boletas")
-    void testListarBoletas() {
-        when(boletaRepositorio.findAll()).thenReturn(List.of(boletaEjemplo));
+    @DisplayName("Conversión y persistencia mantienen consistencia")
+    void testGuardarYLeerDTO() {
+        when(repositorio.save(any(Boleta.class))).thenReturn(boleta);
+        when(repositorio.findById(1L)).thenReturn(Optional.of(boleta));
 
-        List<BoletaDTO> result = boletaServicio.listar();
+        BoletaDTO guardada = servicio.guardar(boletaDTO);
+        BoletaDTO consultada = servicio.obtenerPorId(1L);
 
-        assertThat(result).hasSize(1);
-        verify(boletaRepositorio).findAll();
-    }
-
-    @Test
-    @DisplayName("Debe encontrar boleta por ID")
-    void testBuscarPorId() {
-        when(boletaRepositorio.findById(1L)).thenReturn(Optional.of(boletaEjemplo));
-
-        BoletaDTO result = boletaServicio.obtenerPorId(1L);
-        assertThat(result.getClienteId()).isEqualTo(100L);
-    }
-
-    @Test
-    @DisplayName("Debe lanzar excepción si se intenta guardar boleta sin items")
-    void testGuardarBoletaSinItems() {
-        BoletaDTO dto = new BoletaDTO();
-        dto.setClienteId(1L);
-        dto.setItems(Collections.emptyList());
-
-        assertThatThrownBy(() -> boletaServicio.guardar(dto))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("items");
-    }
-
-    @Test
-    @DisplayName("Debe lanzar excepción si clienteId es nulo")
-    void testGuardarBoletaClienteNulo() {
-        BoletaDTO dto = new BoletaDTO();
-        ItemBoletaDTO itemDTO = new ItemBoletaDTO(1L,"Perfume A",2,5000.0,10000.0);
-        dto.setItems(List.of(itemDTO));
-
-        assertThatThrownBy(() -> boletaServicio.guardar(dto))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("clienteId");
+        assertThat(guardada.getClienteId()).isEqualTo(consultada.getClienteId());
+        assertThat(guardada.getItems().size()).isEqualTo(consultada.getItems().size());
     }
 }

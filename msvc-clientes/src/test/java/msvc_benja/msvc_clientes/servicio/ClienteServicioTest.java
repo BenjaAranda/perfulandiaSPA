@@ -174,4 +174,94 @@ public class ClienteServicioTest {
         assertThatThrownBy(() -> clienteServicio.eliminar(99L))
                 .isInstanceOf(RecursoNoEncontradoException.class);
     }
+    @Test
+    @DisplayName("Debe lanzar excepción si se intenta guardar cliente nulo")
+    void testGuardarClienteNulo() {
+        assertThatThrownBy(() -> clienteServicio.guardar(null))
+                .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    @DisplayName("Debe lanzar excepción si se intenta actualizar con DTO nulo")
+    void testActualizarClienteConDtoNulo() {
+        when(clienteRepositorio.findById(1L)).thenReturn(Optional.of(clienteEjemplo));
+
+        assertThatThrownBy(() -> clienteServicio.actualizar(1L, null))
+                .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    @DisplayName("Guardar cliente: campos obligatorios vacíos o nulos")
+    void testGuardarClienteConCamposInvalidos() {
+        ClienteDTO dtoInvalido = ClienteDTO.builder()
+                .rut("")  // inválido
+                .nombre(null)  // inválido
+                .correo("   ")  // inválido
+                .telefono("")  // inválido
+                .build();
+
+        when(clienteRepositorio.save(any())).thenReturn(clienteEjemplo); // aunque no debería llegar aquí
+
+        assertThatThrownBy(() -> clienteServicio.guardar(dtoInvalido))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("Guardar cliente: cuando repositorio retorna null")
+    void testGuardarClienteRepositorioRetornaNull() {
+        ClienteDTO dto = ClienteDTO.builder()
+                .rut("12345678-9")
+                .nombre("Cliente Falla")
+                .correo("fallo@mail.com")
+                .telefono("911223344")
+                .build();
+
+        when(clienteRepositorio.save(any())).thenReturn(null);
+
+        assertThatThrownBy(() -> clienteServicio.guardar(dto))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Error al guardar el cliente");
+    }
+
+    @Test
+    @DisplayName("Verificar mapeo exacto de DTO -> Entidad y viceversa")
+    void testMapeoDtoEntidad() {
+        ClienteDTO dto = ClienteDTO.builder()
+                .id(99L)
+                .rut("99999999-9")
+                .nombre("Test Mapper")
+                .correo("mapper@mail.com")
+                .telefono("999999999")
+                .build();
+
+        Cliente entidad = Cliente.builder()
+                .id(dto.getId())
+                .rut(dto.getRut())
+                .nombre(dto.getNombre())
+                .correo(dto.getCorreo())
+                .telefono(dto.getTelefono())
+                .build();
+
+        assertThat(entidad.getNombre()).isEqualTo(dto.getNombre());
+        assertThat(entidad.getCorreo()).isEqualTo(dto.getCorreo());
+        assertThat(entidad.getTelefono()).isEqualTo(dto.getTelefono());
+    }
+    @Test
+    @DisplayName("No debe permitir guardar cliente con rut ya existente")
+    void testGuardarClienteRutDuplicado() {
+        when(clienteRepositorio.existsByRut("11111111-1")).thenReturn(true);
+
+        ClienteDTO dto = ClienteDTO.builder()
+                .rut("11111111-1")
+                .nombre("Duplicado")
+                .correo("dup@mail.com")
+                .telefono("123456789")
+                .build();
+
+        assertThatThrownBy(() -> clienteServicio.guardar(dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("ya existe");
+    }
+
+
 }
