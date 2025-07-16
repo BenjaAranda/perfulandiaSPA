@@ -12,14 +12,14 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         Contact contacto = new Contact()
-                .name("Benjamin Aranda")
-                .email("benjamin.aranda@duocuc.cl");
+                .name("Benjamin Aranda DEV")
+                .email("be.arandaa@duocuc.cl");
 
         return new OpenAPI()
                 .info(new Info()
-                        .title("API - Microservicio Clientes")
+                        .title("API - MSVC Clientes")
                         .version("1.0.0")
-                        .description("Este microservicio permite administrar los datos de clientes de la tienda de perfumes")
+                        .description("Microservicio para gestionar clientes en Perfulandia")
                         .contact(contacto)
                         .summary("API CRUD de clientes"));
     }

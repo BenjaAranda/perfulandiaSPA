@@ -20,8 +20,11 @@ public class BoletaDTO {
     @Schema(description = "ID del cliente", example = "5")
     private Long clienteId;
 
-    @Schema(description = "Nombre del cliente (opcional, por Feign)", example = "Juan Pérez")
+    @Schema(description = "Nombre del cliente (obtenido vía Feign desde msvc-clientes)", example = "Juan Pérez")
     private String nombreCliente;
+
+    @Schema(description = "Correo del cliente (obtenido vía Feign desde msvc-clientes)", example = "juan@mail.com")
+    private String correoCliente;
 
     @Schema(description = "Fecha y hora de la emisión", example = "2025-06-24T18:30:00")
     private LocalDateTime fecha;

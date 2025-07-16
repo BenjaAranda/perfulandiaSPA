@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/boletas")
+@RequestMapping("/api/v1/boletas")
 @Tag(name = "Boletas", description = "Operaciones para generar y consultar boletas")
 @Validated
 public class BoletaControlador {
@@ -58,7 +58,7 @@ public class BoletaControlador {
         return ResponseEntity.ok(boletaServicio.obtenerPorId(id));
     }
 
-    @Operation(summary = "Guardar nueva boleta", description = "Crea una nueva boleta con los datos enviados")
+    @Operation(summary = "Guardar nueva boleta", description = "Crea una nueva boleta con los datos enviados (precios se obtienen de ventas, nombre de cliente se obtiene por ID)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Boleta creada exitosamente",
                     content = @Content(mediaType = "application/json",

@@ -84,4 +84,15 @@ public class VentaControlador {
         servicio.eliminar(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/ultima/producto/{productoId}")
+    @Operation(summary = "Obtiene la última venta de un producto", description = "Devuelve la última venta registrada por producto")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Última venta encontrada"),
+            @ApiResponse(responseCode = "404", description = "Venta no encontrada")
+    })
+    public ResponseEntity<VentaDTO> obtenerUltimaVentaPorProductoId(@PathVariable Long productoId) {
+        return ResponseEntity.ok(servicio.obtenerUltimaVentaPorProductoId(productoId));
+    }
+
+
 }

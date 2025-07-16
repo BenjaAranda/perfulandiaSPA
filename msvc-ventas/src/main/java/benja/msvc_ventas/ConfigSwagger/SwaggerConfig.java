@@ -12,16 +12,16 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI apiVentas() {
         Contact contacto = new Contact()
-                .name("Benjamín Aranda")
-                .email("benja@perfulandiaspa.cl");
+                .name("Benjamín Aranda DEV")
+                .email("be.arandaa@duocuc.cl");
 
         return new OpenAPI()
                 .info(new Info()
-                        .title("API - MSVC - Ventas")
+                        .title("API - MSVC Ventas")
                         .version("1.0.0")
-                        .description("Microservicio para registrar y gestionar ventas")
+                        .description("Microservicio para registrar y gestionar ventas en Perfulandia")
                         .contact(contacto)
-                        .summary("Permite operaciones CRUD y conexión con Inventario"));
+                        .summary("API operaciones CRUD de ventas y conexión con Inventario"));
     }
 }
 

@@ -15,10 +15,10 @@ public class SwaggerConfig {
                 .info(new Info()
                         .title("API - MSVC Boleta")
                         .version("1.0.0")
-                        .description("Microservicio para gestionar boletas en la tienda de perfumes Perfulandia")
+                        .description("Microservicio para gestionar boletas en Perfulandia")
                         .contact(new Contact()
-                                .name("Perfulandia Dev")
-                                .email("soporte@perfulandia.cl"))
+                                .name("Benjamin Aranda DEV")
+                                .email("be.arandaa@duocuc.cl"))
                 );
     }
 }
