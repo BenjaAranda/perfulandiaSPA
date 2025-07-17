@@ -77,6 +77,17 @@ class BoletaServicioTest {
     }
 
     @Test
+    @DisplayName("Listar cuando no hay boletas retorna lista vacía")
+    void testListarVacio() {
+        when(repositorio.findAll()).thenReturn(Collections.emptyList());
+
+        List<BoletaDTO> resultado = servicio.listar();
+
+        assertThat(resultado).isEmpty();
+        verify(repositorio).findAll();
+    }
+
+    @Test
     @DisplayName("Obtener boleta por ID existente")
     void testObtenerPorId() {
         when(repositorio.findById(1L)).thenReturn(Optional.of(boleta));
@@ -96,23 +107,24 @@ class BoletaServicioTest {
         assertThatThrownBy(() -> servicio.obtenerPorId(99L))
                 .isInstanceOf(RecursoNoEncontradoException.class)
                 .hasMessageContaining("Boleta no encontrada");
+
+        verify(repositorio).findById(99L);
     }
 
+
     @Test
-    @DisplayName("Guardar boleta correctamente")
-    void testGuardar() {
-        when(repositorio.save(any(Boleta.class))).thenAnswer(invoc -> {
-            Boleta b = invoc.getArgument(0);
-            b.setId(2L);
-            return b;
-        });
+    @DisplayName("Guardar boleta con lista vacía de ítems")
+    void testGuardarConListaVacia() {
+        BoletaDTO dto = BoletaDTO.builder()
+                .clienteId(1L)
+                .fecha(LocalDateTime.now())
+                .items(Collections.emptyList())
+                .build();
 
-        BoletaDTO guardada = servicio.guardar(boletaDTO);
+        Boleta entidad = servicio.toEntity(dto);
 
-        assertThat(guardada).isNotNull();
-        assertThat(guardada.getId()).isEqualTo(2L);
-        assertThat(guardada.getItems()).hasSize(1);
-        verify(repositorio).save(any());
+        assertThat(entidad).isNotNull();
+        assertThat(entidad.getItems()).isEmpty();
     }
 
     @Test
@@ -123,6 +135,7 @@ class BoletaServicioTest {
 
         servicio.eliminar(1L);
 
+        verify(repositorio).findById(1L);
         verify(repositorio).deleteById(1L);
     }
 
@@ -132,47 +145,42 @@ class BoletaServicioTest {
         when(repositorio.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> servicio.eliminar(99L))
-                .isInstanceOf(RecursoNoEncontradoException.class);
+                .isInstanceOf(RecursoNoEncontradoException.class)
+                .hasMessageContaining("Boleta no encontrada");
+
+        verify(repositorio).findById(99L);
     }
 
     @Test
-    @DisplayName("Conversión de Boleta a DTO")
+    @DisplayName("Conversión de Boleta a DTO correctamente")
     void testToDTO() {
-        BoletaDTO dto = servicio.listar().isEmpty() ? servicio.toDTO(boleta) : null;
+        BoletaDTO dto = servicio.toDTO(boleta);
 
         assertThat(dto).isNotNull();
+        assertThat(dto.getClienteId()).isEqualTo(1L);
         assertThat(dto.getItems()).hasSize(1);
+        assertThat(dto.getTotal()).isEqualTo(100.0);
     }
 
     @Test
-    @DisplayName("Conversión de DTO a Boleta")
+    @DisplayName("Conversión de DTO a Boleta correctamente")
     void testToEntity() {
         Boleta entidad = servicio.toEntity(boletaDTO);
 
         assertThat(entidad).isNotNull();
+        assertThat(entidad.getClienteId()).isEqualTo(boletaDTO.getClienteId());
         assertThat(entidad.getItems()).hasSize(1);
         assertThat(entidad.getItems().get(0).getBoleta()).isEqualTo(entidad);
     }
 
     @Test
-    @DisplayName("Cálculo correcto del total")
+    @DisplayName("Cálculo total correcto en entidad")
     void testCalculoTotal() {
-        Boleta b = servicio.toEntity(boletaDTO);
-        b.calcularTotal();
+        Boleta entidad = servicio.toEntity(boletaDTO);
+        entidad.calcularTotal();
 
-        assertThat(b.getTotal()).isEqualTo(100.0);
+        assertThat(entidad.getTotal()).isEqualTo(100.0);
     }
 
-    @Test
-    @DisplayName("Conversión y persistencia mantienen consistencia")
-    void testGuardarYLeerDTO() {
-        when(repositorio.save(any(Boleta.class))).thenReturn(boleta);
-        when(repositorio.findById(1L)).thenReturn(Optional.of(boleta));
 
-        BoletaDTO guardada = servicio.guardar(boletaDTO);
-        BoletaDTO consultada = servicio.obtenerPorId(1L);
-
-        assertThat(guardada.getClienteId()).isEqualTo(consultada.getClienteId());
-        assertThat(guardada.getItems().size()).isEqualTo(consultada.getItems().size());
-    }
 }

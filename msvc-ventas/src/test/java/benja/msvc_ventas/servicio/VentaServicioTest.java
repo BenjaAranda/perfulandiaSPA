@@ -27,7 +27,7 @@ public class VentaServicioTest {
     private ProductoClienteRest productoClienteRest;
 
     @InjectMocks
-    private VentaServicio ventaServicio;
+    private VentaServicioImpl ventaServicio;
 
     private Venta venta;
     private ProductoDTO productoDTO;
