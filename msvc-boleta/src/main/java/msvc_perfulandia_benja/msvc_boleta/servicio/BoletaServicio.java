@@ -8,7 +8,7 @@ public interface BoletaServicio {
     List<BoletaDTO> listar();
     BoletaDTO obtenerPorId(Long id);
     BoletaDTO guardar(BoletaDTO boleta);
+    BoletaDTO generarBoletaDesdeClienteYVenta(Long clienteId, Long ventaId);
+    BoletaDTO generarBoletaDesdeVenta(Long ventaId);
     void eliminar(Long id);
 }
-
-

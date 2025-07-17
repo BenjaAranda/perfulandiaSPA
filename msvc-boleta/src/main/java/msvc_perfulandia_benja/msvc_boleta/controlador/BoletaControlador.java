@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import msvc_perfulandia_benja.msvc_boleta.dto.BoletaDTO;
+import msvc_perfulandia_benja.msvc_boleta.dto.CrearBoletaDTO;
 import msvc_perfulandia_benja.msvc_boleta.dto.ErrorDTO;
 import msvc_perfulandia_benja.msvc_boleta.servicio.BoletaServicio;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,17 @@ public class BoletaControlador {
 
     public BoletaControlador(BoletaServicio boletaServicio) {
         this.boletaServicio = boletaServicio;
+    }
+
+    @Operation(summary = "Crear boleta desde cliente y venta", description = "Crea boleta automática con datos obtenidos desde venta y cliente")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Boleta creada exitosamente"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos o recursos no encontrados")
+    })
+    @PostMapping("/generar")
+    public ResponseEntity<BoletaDTO> crearBoleta(@Valid @RequestBody CrearBoletaDTO crearBoletaDTO) {
+        BoletaDTO boletaCreada = boletaServicio.generarBoletaDesdeClienteYVenta(crearBoletaDTO.getClienteId(), crearBoletaDTO.getVentaId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(boletaCreada);
     }
 
     @Operation(summary = "Listar todas las boletas", description = "Devuelve una lista con todas las boletas registradas")
@@ -91,4 +103,19 @@ public class BoletaControlador {
         boletaServicio.eliminar(id);
         return ResponseEntity.noContent().build();
     }
+    @Operation(summary = "Generar boleta desde cliente y venta", description = "Genera una boleta vinculada al cliente y a los productos de la venta correspondiente.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Boleta generada exitosamente", content = @Content(schema = @Schema(implementation = BoletaDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos o incompletos"),
+            @ApiResponse(responseCode = "404", description = "Cliente o venta no encontrados"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    @PostMapping("/cliente/{clienteId}/venta/{ventaId}")
+    public ResponseEntity<BoletaDTO> generarDesdeClienteYVenta(@PathVariable Long clienteId, @PathVariable Long ventaId) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(boletaServicio.generarBoletaDesdeClienteYVenta(clienteId, ventaId));
+    }
+
+
+
 }

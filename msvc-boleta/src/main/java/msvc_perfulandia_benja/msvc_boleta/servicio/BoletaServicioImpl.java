@@ -11,6 +11,7 @@ import msvc_perfulandia_benja.msvc_boleta.repositorio.BoletaRepositorio;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,15 @@ public class BoletaServicioImpl implements BoletaServicio {
     }
 
     @Override
+    public BoletaDTO generarBoletaDesdeVenta(Long ventaId) {
+        VentaDTO venta = ventaClientRest.obtenerVentaPorId(ventaId);
+        if (venta == null) {
+            throw new RecursoNoEncontradoException("Venta no encontrada con ID: " + ventaId);
+        }
+        throw new UnsupportedOperationException("No se puede generar boleta desde venta porque VentaDTO no contiene clienteId ni lista de productos.");
+    }
+
+    @Override
     public List<BoletaDTO> listar() {
         return repositorio.findAll().stream()
                 .map(this::toDTO)
@@ -48,43 +58,55 @@ public class BoletaServicioImpl implements BoletaServicio {
 
     @Override
     public BoletaDTO guardar(BoletaDTO dto) {
-        // Validar cliente real
-        ClienteDTO cliente = clienteClientRest.buscarPorId(dto.getClienteId());
+        throw new UnsupportedOperationException("Usa generarBoletaDesdeClienteYVenta para crear boletas.");
+    }
+
+    @Override
+    public BoletaDTO generarBoletaDesdeClienteYVenta(Long clienteId, Long ventaId) {
+        // Obtener cliente por Feign
+        ClienteDTO cliente = clienteClientRest.buscarPorId(clienteId);
         if (cliente == null) {
-            throw new RecursoNoEncontradoException("Cliente no encontrado con ID: " + dto.getClienteId());
+            throw new RecursoNoEncontradoException("Cliente no encontrado con ID: " + clienteId);
         }
 
-        // Actualizar items con precio unitario real y nombre producto + subtotal
-        List<ItemBoletaDTO> itemsActualizados = dto.getItems().stream().map(item -> {
-            VentaDTO venta = ventaClientRest.obtenerUltimaVentaPorProductoId(item.getProductoId());
-            if (venta == null) {
-                throw new RecursoNoEncontradoException("Venta no encontrada para producto ID: " + item.getProductoId());
-            }
+        // Obtener venta por Feign
+        VentaDTO venta = ventaClientRest.obtenerVentaPorId(ventaId);
+        if (venta == null) {
+            throw new RecursoNoEncontradoException("Venta no encontrada con ID: " + ventaId);
+        }
 
-            ProductoDTO producto = null;
-            try {
-                producto = productoClientRest.obtenerProductoPorId(item.getProductoId());
-            } catch (Exception ignored) {}
+        // Obtener producto por Feign (producto que corresponde a la venta)
+        ProductoDTO producto = null;
+        try {
+            producto = productoClientRest.obtenerProductoPorId(venta.getProductoId());
+        } catch (Exception ignored) {}
 
-            double precioUnitario = venta.getTotal() / venta.getCantidad();
+        // Construir item de boleta basado en la venta simplificada
+        ItemBoletaDTO item = ItemBoletaDTO.builder()
+                .productoId(venta.getProductoId())
+                .cantidad(venta.getCantidad() != null ? venta.getCantidad() : 1)
+                .precioUnitario(
+                        (venta.getTotal() != null && venta.getCantidad() != null && venta.getCantidad() != 0)
+                                ? venta.getTotal() / venta.getCantidad()
+                                : 0.0)
+                .subtotal(venta.getTotal() != null ? venta.getTotal() : 0.0)
+                .nombreProducto(producto != null ? producto.getNombre() : "Nombre no disponible")
+                .build();
 
-            return ItemBoletaDTO.builder()
-                    .productoId(item.getProductoId())
-                    .cantidad(item.getCantidad())
-                    .precioUnitario(precioUnitario)
-                    .subtotal(precioUnitario * item.getCantidad())
-                    .nombreProducto(producto != null ? producto.getNombre() : null)
-                    .build();
-        }).collect(Collectors.toList());
+        List<ItemBoletaDTO> items = Collections.singletonList(item);
 
-        dto.setItems(itemsActualizados);
-        dto.setNombreCliente(cliente.getNombre() + " " + cliente.getApellido());
-        dto.setCorreoCliente(cliente.getCorreo());
-        dto.setFecha(LocalDateTime.now()); // Fecha automática al guardar
+        // Construir DTO de boleta con cliente y items
+        BoletaDTO boletaDTO = BoletaDTO.builder()
+                .clienteId(clienteId)
+                .nombreCliente(cliente.getNombre() + " " + cliente.getApellido())
+                .correoCliente(cliente.getCorreo())
+                .fecha(LocalDateTime.now())
+                .items(items)
+                .build();
 
-        Boleta boleta = toEntity(dto);
+        // Guardar en base de datos
+        Boleta boleta = toEntity(boletaDTO);
         boleta.calcularTotal();
-
         Boleta boletaGuardada = repositorio.save(boleta);
 
         return toDTO(boletaGuardada);
@@ -97,7 +119,7 @@ public class BoletaServicioImpl implements BoletaServicio {
         repositorio.deleteById(id);
     }
 
-    // Conversión entidad -> DTO
+    // Convertir entidad a DTO
     protected BoletaDTO toDTO(Boleta boleta) {
         ClienteDTO cliente = null;
         try {
@@ -122,7 +144,7 @@ public class BoletaServicioImpl implements BoletaServicio {
                             .cantidad(item.getCantidad())
                             .precioUnitario(item.getPrecioUnitario())
                             .subtotal(subtotal)
-                            .nombreProducto(nombreProducto)
+                            .nombreProducto(nombreProducto != null ? nombreProducto : "Nombre no disponible")
                             .build();
                 }).collect(Collectors.toList());
 
@@ -137,7 +159,7 @@ public class BoletaServicioImpl implements BoletaServicio {
                 .build();
     }
 
-    // Conversión DTO -> entidad
+    // Convertir DTO a entidad
     protected Boleta toEntity(BoletaDTO dto) {
         Boleta boleta = new Boleta();
         boleta.setClienteId(dto.getClienteId());

@@ -21,9 +21,15 @@ public class Boleta {
 
     private Long clienteId;
 
+    private String nombreCliente;
+
+    private String correoCliente;
+
     private LocalDateTime fecha;
 
     private Double total;
+
+    private String estado;
 
     @OneToMany(mappedBy = "boleta", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<BoletaDetalle> items;

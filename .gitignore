@@ -1,7 +1,17 @@
+# Ignorar carpetas target y build típicas de Maven y Gradle
 target/
+build/
+
+# No ignorar maven-wrapper.jar
 !.mvn/wrapper/maven-wrapper.jar
+
+# No ignorar carpetas target específicas de src/main y src/test
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+# Archivos de bases de datos H2 (base mv.db)
+data/*.mv.db
+data/*.trace.db
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
@@ -27,7 +37,8 @@ target/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
+
+# Ignorar carpetas build en src/main y src/test de NetBeans
 !**/src/main/**/build/
 !**/src/test/**/build/
 
